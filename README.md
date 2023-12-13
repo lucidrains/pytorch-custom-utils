@@ -1,2 +1,15 @@
-# pytorch-custom-utils
-Just some custom utility functions / decorators to speed up building out some of the boilerplate training code for various AI research papers
+## Pytorch Custom Utils (wip)
+
+Just some miscellaneous utility functions / decorators / modules related to Pytorch and <a href="https://huggingface.co/docs/accelerate/index">Accelerate</a>
+
+## Install
+
+```bash
+$ pip install pytorch-custom-utils
+```
+
+## Usage
+
+```python
+from pytorch_custom_utils import module_save_load
+```
