@@ -1,6 +1,6 @@
 ## Pytorch Custom Utils (wip)
 
-Just some miscellaneous utility functions / decorators / modules related to Pytorch and <a href="https://huggingface.co/docs/accelerate/index">Accelerate</a>
+Just some miscellaneous utility functions / decorators / modules related to Pytorch and <a href="https://huggingface.co/docs/accelerate/index">Accelerate</a> to help speed up implementation of new AI research
 
 ## Install
 
