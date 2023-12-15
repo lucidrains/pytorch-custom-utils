@@ -8,7 +8,7 @@ Just some miscellaneous utility functions / decorators / modules related to Pyto
 $ pip install pytorch-custom-utils
 ```
 
-## Usage
+### Quick save and load
 
 Class decorator for adding a quick `save` and `load` method to the module instance. Can also initialize the entire network with a class method, `init_and_load`.
 
@@ -43,4 +43,35 @@ mlp.load('./mlp.pt')
 # you can also directly initialize from the checkpoint, without having to save the corresponding hyperparameters (in this case, dim = 512)
 
 mlp = MLP.init_and_load('./mlp.pt')
+```
+
+### Keep track of device on module
+
+ex.
+
+```python
+import torch
+from torch import nn
+
+from pytorch_custom_utils import module_device
+
+# decorate the class with `module_device` class decorator
+
+@module_device()
+class MLP(nn.Module):
+    def __init__(self, dim):
+        super().__init__()
+        self.net = nn.Linear(dim, dim)
+
+    def forward(self, x):
+        return self.net(x)
+
+# instantiated mlp
+
+mlp = MLP(dim = 512)
+mlp.to(torch.device('mps'))
+
+# now you have a convenient .device
+
+mlp.device # mps:0
 ```
