@@ -1,5 +1,6 @@
 from functools import wraps
 from typing import List
+from optree import tree_flatten, tree_unflatten
 
 import torch
 from torch import is_tensor
@@ -55,32 +56,27 @@ def autocast_device(
                 else:
                     device = next(self.parameters()).device
 
+                # flatten
+
+                flattened_args, tree_spec = tree_flatten([args, kwargs])
+
                 # transform args
 
-                new_args = []
+                maybe_transformed_args = []
 
-                for arg in args:
-                    if is_tensor(arg):
-                        arg = arg.to(device)
+                for flattened_arg in flattened_args:
+                    if is_tensor(flattened_arg):
+                        flattened_arg = flattened_arg.to(device)
 
-                    new_args.append(arg)
+                    maybe_transformed_args.append(flattened_arg)
 
-                # transform kwargs
+                # unflatten
 
-                keys = kwargs.keys()
-                new_values = []
-
-                for value in kwargs.values():
-                    if is_tensor(value):
-                        value = value.to(device)
-
-                    new_values.append(value)
-
-                new_kwargs = dict(zip(keys, new_values))
+                args, kwargs = tree_unflatten(tree_spec, maybe_transformed_args)
 
                 # call original fn
 
-                orig_fn(self, *new_args, **new_kwargs)
+                orig_fn(self, *args, **kwargs)
 
             setattr(klass, method, fn)
 
