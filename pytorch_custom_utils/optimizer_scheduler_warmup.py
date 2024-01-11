@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from typing import Optional, Type
 
 from accelerate import Accelerator
@@ -33,7 +34,9 @@ class OptimizerWithWarmupSchedule(nn.Module):
     ):
         super().__init__()
         self.max_grad_norm = max_grad_norm
-        self.warmup = warmup.LinearWarmup(optimizer, warmup_period = warmup_steps)
+        has_warmup = warmup_steps > 0
+
+        self.warmup = warmup.LinearWarmup(optimizer, warmup_period = warmup_steps) if has_warmup else None
 
         if exists(scheduler):
             self.scheduler = scheduler(optimizer, **scheduler_kwargs)
@@ -46,16 +49,22 @@ class OptimizerWithWarmupSchedule(nn.Module):
         self.accelerator = accelerator
 
     def state_dict(self):
-        return dict(
+        pkg = dict(
             optimizer = self.optimizer.state_dict(),
-            scheduler = self.scheduler.state_dict(),
-            warmup = self.warmup.state_dict()
+            scheduler = self.scheduler.state_dict()
         )
+
+        if exists(self.warmup):
+            pkg['warmup'] = self.warmup.state_dict()
+
+        return pkg
 
     def load_state_dict(self, pkg):
         self.optimizer.load_state_dict(pkg['optimizer'])
         self.scheduler.load_state_dict(pkg['scheduler'])
-        self.warmup.load_state_dict(pkg['warmup'])
+
+        if exists(self.warmup):
+            self.warmup.load_state_dict(pkg['warmup'])
 
     def zero_grad(self):
         self.optimizer.zero_grad()
@@ -68,5 +77,7 @@ class OptimizerWithWarmupSchedule(nn.Module):
         self.optimizer.step()
 
         if not self.accelerator.optimizer_step_was_skipped:
-            with self.warmup.dampening():
+            context = nullcontext if not exists(self.warmup) else self.warmup.dampening
+
+            with context():
                 self.scheduler.step()
