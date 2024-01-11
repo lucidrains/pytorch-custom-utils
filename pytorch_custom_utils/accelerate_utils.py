@@ -1,12 +1,21 @@
+from functools import partial
 from typing import Optional, Callable
+from contextlib import nullcontext, contextmanager
 
-from contextlib import contextmanager
+from torch.nn import Module
 
 from accelerate import Accelerator
 from accelerate.tracking import WandBTracker
 
+# helper functions
+
 def exists(v):
     return v is not None
+
+@contextmanager
+def combine_contexts(a, b):
+    with a() as c1, b() as c2:
+        yield (c1, c2)
 
 def find_first(cond: Callable, arr):
     for el in arr:
@@ -94,3 +103,18 @@ def auto_unwrap_model(
         return klass
 
     return decorator
+
+# gradient accumulation context manager
+# for no_sync context on all but the last iteration
+
+def model_forward_contexts(
+    accelerator: Accelerator,
+    model: Module,
+    grad_accum_steps: int = 1
+):
+    for i in range(grad_accum_steps):
+        is_last_step = i == grad_accum_steps - 1
+
+        maybe_no_sync = partial(accelerator.no_sync, model) if not is_last_step else nullcontext
+
+        yield partial(combine_contexts, accelerator.autocast, maybe_no_sync)
