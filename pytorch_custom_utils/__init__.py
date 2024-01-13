@@ -4,6 +4,7 @@ from pytorch_custom_utils.module_device import (
     autocast_device
 )
 from pytorch_custom_utils.save_load import save_load
+from pytorch_custom_utils.total_parameters import total_parameters
 from pytorch_custom_utils.get_adam_optimizer import get_adam_optimizer
 from pytorch_custom_utils.optimizer_scheduler_warmup import OptimizerWithWarmupSchedule
 
