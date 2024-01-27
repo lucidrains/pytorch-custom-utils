@@ -33,7 +33,7 @@ def masked_mean(tensor, mask, dim = -1, eps = 1e-5):
 
     total_el = mask.sum(dim = dim)
     num = tensor.sum(dim = dim)
-    den = total_el.clamp(min = eps)
+    den = total_el.float().clamp(min = eps)
     mean = num / den
     mean.masked_fill_(total_el == 0, 0.)
     return mean
