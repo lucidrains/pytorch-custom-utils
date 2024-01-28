@@ -4,6 +4,8 @@ import torch.nn.functional as F
 def exists(v):
     return v is not None
 
+# padding and slicing
+
 def pad_at_dim(t, pad: Tuple[int, int], *, dim = -1, value = 0.):
     dims_from_right = (- dim - 1) if dim < 0 else (t.ndim - dim - 1)
     zeros = ((0, 0) * dims_from_right)
@@ -25,6 +27,8 @@ def pad_or_slice_to(t, length, *, dim, pad_value = 0):
 
     return t
 
+# masking related
+
 def masked_mean(tensor, mask, dim = -1, eps = 1e-5):
     if not exists(mask):
         return tensor.mean(dim = dim)
@@ -37,3 +41,14 @@ def masked_mean(tensor, mask, dim = -1, eps = 1e-5):
     mean = num / den
     mean.masked_fill_(total_el == 0, 0.)
     return mean
+
+def maybe_and_mask(*masks):
+    masks = [*filter(exists, masks)]
+    if len(masks) == 0:
+        return None
+
+    mask, *rest_masks = masks
+    for rest_mask in rest_masks:
+        mask = mask & rest_mask
+
+    return mask
