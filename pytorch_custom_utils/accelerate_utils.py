@@ -1,4 +1,4 @@
-from functools import partial
+from functools import partial, wraps
 from typing import Optional, Callable
 from contextlib import nullcontext, contextmanager
 
@@ -90,6 +90,7 @@ def auto_unwrap_model(
     def decorator(klass):
         _orig_init = klass.__init__
 
+        @wraps(_orig_init)
         def __init__(self, *args, **kwargs):
             _orig_init(self, *args, **kwargs)
             model = getattr(self, model_instance_name)

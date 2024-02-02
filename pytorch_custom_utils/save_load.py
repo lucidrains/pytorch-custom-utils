@@ -1,4 +1,5 @@
 import pickle
+from functools import wraps
 from pathlib import Path
 from packaging import version
 
@@ -26,6 +27,7 @@ def save_load(
 
         _orig_init = klass.__init__
 
+        @wraps(_orig_init)
         def __init__(self, *args, **kwargs):
             _config = pickle.dumps((args, kwargs))
 

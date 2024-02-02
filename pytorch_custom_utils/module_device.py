@@ -17,6 +17,7 @@ def module_device(
 
         _orig_init = klass.__init__
 
+        @wraps(_orig_init)
         def __init__(self, *args, **kwargs):
             _orig_init(self, *args, **kwargs)
 
