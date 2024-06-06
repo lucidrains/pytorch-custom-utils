@@ -1,7 +1,7 @@
 import pickle
 from functools import wraps
 from pathlib import Path
-from packaging import version
+from packaging import version as packaging_version
 
 import torch
 from torch.nn import Module
@@ -52,7 +52,7 @@ def save_load(
 
             pkg = torch.load(str(path), map_location = 'cpu')
 
-            if exists(version) and exists(pkg['version']) and version.parse(version) != version.parse(pkg['version']):
+            if exists(version) and exists(pkg['version']) and packaging_version.parse(version) != packaging_version.parse(pkg['version']):
                 self.print(f'loading saved model at version {pkg["version"]}, but current package version is {__version__}')
 
             self.load_state_dict(pkg['model'], strict = strict)
