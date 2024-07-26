@@ -1,10 +1,10 @@
 from functools import wraps
 from typing import List
-from optree import tree_flatten, tree_unflatten
 
 import torch
 from torch import is_tensor
 from torch.nn import Module
+from torch.utils._pytree import tree_flatten, tree_unflatten
 
 # provides a .device for your model
 # uses a dummy scalar tensor
@@ -73,7 +73,7 @@ def autocast_device(
 
                 # unflatten
 
-                args, kwargs = tree_unflatten(tree_spec, maybe_transformed_args)
+                args, kwargs = tree_unflatten(maybe_transformed_args, tree_spec)
 
                 # call original fn
 
